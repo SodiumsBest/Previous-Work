@@ -1,0 +1,72 @@
+//Example script from a Mod for the game Slay the Spire I made.
+
+package theMenace.cards;
+
+import basemod.AutoAdd;
+import com.evacipated.cardcrawl.mod.stslib.fields.cards.AbstractCard.ExhaustiveField;
+import com.megacrit.cardcrawl.actions.AbstractGameAction;
+import com.megacrit.cardcrawl.actions.common.ApplyPowerAction;
+import com.megacrit.cardcrawl.actions.common.DamageAction;
+import com.megacrit.cardcrawl.actions.common.DamageRandomEnemyAction;
+import com.megacrit.cardcrawl.actions.utility.UpdateCardDescriptionAction;
+import com.megacrit.cardcrawl.cards.AbstractCard;
+import com.megacrit.cardcrawl.cards.DamageInfo;
+import com.megacrit.cardcrawl.characters.AbstractPlayer;
+import com.megacrit.cardcrawl.dungeons.AbstractDungeon;
+import com.megacrit.cardcrawl.monsters.AbstractMonster;
+import theMenace.DefaultMod;
+import theMenace.characters.TheDefault;
+import theMenace.powers.AttackNextTurnPower;
+import theMenace.variables.CustomTags;
+
+import static theMenace.DefaultMod.makeCardPath;
+
+public class Rockslide extends AbstractDynamicCard {
+
+    public static final String ID = DefaultMod.makeID(Rockslide.class.getSimpleName());
+    public static final String IMG = makeCardPath("Rockslide.png");
+
+    private static final CardRarity RARITY = CardRarity.RARE; 
+    private static final CardTarget TARGET = CardTarget.ALL_ENEMY;  
+    private static final CardType TYPE = CardType.ATTACK;       
+    public static final CardColor COLOR = theMenace.Enums.COLOR_GRAY;
+
+    private static final int COST = 2;
+    private static final int UPGRADED_COST = 1;
+
+    private static final int amt = 2;
+    //private static final int UPGRADE_PLUS_DMG = ;
+
+    public Rockslide() {
+        super(ID, IMG, COST, TYPE, COLOR, RARITY, TARGET);
+        baseMagicNumber = magicNumber = 0;
+        defaultBaseSecondMagicNumber = defaultSecondMagicNumber = 2;
+        ExhaustiveField.ExhaustiveFields.baseExhaustive.set(this,defaultSecondMagicNumber);
+        ExhaustiveField.ExhaustiveFields.exhaustive.set(this,defaultSecondMagicNumber);
+    }
+    public void triggerOnCardPlayed(AbstractCard c) {
+        if (c.hasTag(CustomTags.Rock)){
+            upgradeMagicNumber(amt);
+            initializeDescription();
+        }
+    }
+
+    @Override
+    public void use(AbstractPlayer p, AbstractMonster m) {
+
+        if(magicNumber > 0) {
+            AbstractDungeon.actionManager.addToBottom(new ApplyPowerAction(p, p, new AttackNextTurnPower(p, p, magicNumber)));
+        }
+        upgradeDefaultSecondMagicNumber(-1);
+        initializeDescription();
+    }
+
+    @Override
+    public void upgrade() {
+        if (!upgraded) {
+            upgradeName();
+            upgradeBaseCost(UPGRADED_COST);
+            initializeDescription();
+        }
+    }
+}
